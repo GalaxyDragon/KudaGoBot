@@ -3,14 +3,14 @@ from flask import json
 
 
 def get_events_geo(lat, lon, radius=1000):
-   #  """
-   # :param lat: координата
-   # :param lon: другая координата(по-моему первое широта второе долгота, но фигач также, как в телеграмме, они в таком
-   # же порядке)
-   # :param radius: радиус, в котором будут найдены мероприятия(необязательны параметр), если нет никаких мероприятий в
-   # заданном радиусе, то он будет расширен на 1000 метров
-   # :return: ссылка на следующую страницу и 5 результатов на текущей странице
-   # """
+    """
+    :param lat: координата
+    :param lon: другая координата(по-моему первое широта второе долгота, но фигач также, как в телеграмме, они в таком
+    же порядке)
+    :param radius: радиус, в котором будут найдены мероприятия(необязательны параметр), если нет никаких мероприятий в
+    заданном радиусе, то он будет расширен на 1000 метров
+    :return: ссылка на следующую страницу и 5 результатов на текущей странице
+    """
     link = "https://kudago.com/public-api/v1.3/events/?lat=" + str(lat) + "&lon=" + str(lon) + "&radius=" + \
            str(radius) + "&page_size=5&fields=dates,title,description,site_url"
     answer = requests.get(link).text
@@ -24,6 +24,8 @@ def get_events_geo(lat, lon, radius=1000):
                    str(radius) + "&page_size=5&fields=dates,title,description,site_url"
             answer = requests.get(link).text
             answer = json.loads(answer)
+            if radius >= 10000:
+                return None
 
 
 def get_next_events_geo(lat, lon, next_link):
@@ -40,3 +42,4 @@ def get_next_events_geo(lat, lon, next_link):
                      str(radius) + "&page_size=5&fields=dates,title,description,site_url"
             answer = requests.get(__link).text
             answer = json.loads(answer)
+
