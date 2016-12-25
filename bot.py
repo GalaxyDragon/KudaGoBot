@@ -6,7 +6,7 @@ import API_kuda
 import config
 
 
-class inform:
+class GetInformation:
     Step = 0
     Near = False
     City = None
@@ -14,13 +14,13 @@ class inform:
     Type = None
     coord = [None, None]
 
-    def zapros(self):
+    def request_(self):
         pass
 
 
 # steps:
 # 1 - события рядом либо простой поиск
-usr_now = inform()
+usr_now = GetInformation()
 bot = telebot.TeleBot(config.token)
 
 
@@ -37,7 +37,7 @@ def img_ids(message):
 
 
 @bot.message_handler(content_types=["text"])
-def meropriyatiya(message):
+def events(message):
     if usr_now.Step == 1:
         usr_now.City = message.text
         usr_now.Step = 2
@@ -73,7 +73,6 @@ def meropriyatiya(message):
         bot.send_message(message.chat.id, "Ищем события для Вас...")
         answer = API_kuda.get_events_geo(float(55.725979), float(37.464099))
         bot.send_message(message.chat.id, "Спасибо за ожидаение!", reply_markup=config.Ready)
-        print(answer)
         if answer is None:
             answer = "Событий рядом с Вами найти не удалось."
             bot.send_message(message.chat.id, answer,
@@ -84,13 +83,11 @@ def meropriyatiya(message):
             for i in range(len(message_text)):
                 reply_list = message_text[i]
                 reply = "#" + str(i + 1) + "\n" + reply_list["title"] + "\n" \
-                        + cleanhtml(reply_list["description"]) + "\n" + "Время начала мероприятия: " + "\n" + \
-                        datetime.datetime.fromtimestamp(int(reply_list["dates"]["start"])).strftime(
-                            '%Y-%m-%d %H:%M') + "Время конца мероприятия: " + "\n" \
-                        + cleanhtml(reply_list["description"]) + "\n" + "Время начала мероприятия: " + "\n" + \
-                        datetime.datetime.fromtimestamp(int(reply_list["dates"]["end"])).strftime(
-                            '%Y-%m-%d %H:%M')
-
+                        + cleanhtml(reply_list["description"]) + "\n" + "Время начала мероприятия: " + \
+                        datetime.datetime.fromtimestamp(int(reply_list["dates"][0]["start"])).strftime(
+                            '%Y-%m-%d %H:%M') + "\n" + "Время конца мероприятия: " \
+                        + datetime.datetime.fromtimestamp(int(reply_list["dates"][0]["start"])).strftime(
+                            '%Y-%m-%d %H:%M') + "\n" + "Полное описание мероприятия: " + reply_list["site_url"]
 
                 bot.send_message(message.chat.id, reply, disable_web_page_preview=True)
             bot.send_message(message.chat.id, "Надеемся, что мы смогли Вам помочь!",
