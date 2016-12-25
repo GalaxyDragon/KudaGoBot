@@ -26,6 +26,7 @@ usr_now = GetInformation()
 bot = telebot.TeleBot(config.token)
 
 
+<<<<<<< Updated upstream
 # пока много шлака но оставь, 1 хер допиливать до полного.Если уж совсем
 # не имётся, то можешь подчищенный на новую ветку кинуть. Или меня пнуть, чтобы саам чего лишнего не стёр. Как хошь
 
@@ -33,6 +34,12 @@ def cleanhtml(raw_html):
     cleanr = re.compile('<.*?>')
     cleantext = re.sub(cleanr, '', raw_html)
     return cleantext
+=======
+def clean_html(raw_html):
+    clean = re.compile('<.*?>')
+    clean_text = re.sub(clean, '', raw_html)
+    return clean_text
+>>>>>>> Stashed changes
 
 
 @bot.message_handler(commands=["start"])
@@ -68,6 +75,7 @@ def events(message):
     if usr_now.Step == 5:
         print(usr_now.Step, usr_now.Type, usr_now.City, usr_now.Money, usr_now.Near)
 
+<<<<<<< Updated upstream
     if usr_now.Step == 8 and ["Ещё", "Всё", "Заново"].count(message.text) == 1:
         a = message.text
         if a == "Ещё":
@@ -95,6 +103,33 @@ def events(message):
             bot.send_message(message.chat.id, "бла бла бла 5-10")
         if a == "Заново":
             bot.send_message(message.chat.id, "Ну ты и пидр", reply_markup=config.AGAIN)
+=======
+    if usr_now.Step == 7:
+        bot.send_message(message.chat.id, "Ищем события для Вас...")
+        answer = API_kuda.get_events_geo(float(55.725979), float(37.464099))
+        bot.send_message(message.chat.id, "Спасибо за ожидаение!", reply_markup=config.Ready)
+        if answer is None:
+            answer = "Событий рядом с Вами найти не удалось."
+            bot.send_message(message.chat.id, answer,
+                             reply_markup=config.Ready)
+        else:
+            message_text = answer[1]
+            next = answer[0]
+            for i in range(len(message_text)):
+                reply_list = message_text[i]
+                reply = "#" + str(i + 1) + "\n" + reply_list["title"] + "\n" \
+                        + clean_html(reply_list["description"]) + "\n" + "Время начала мероприятия: " + \
+                        datetime.datetime.fromtimestamp(int(reply_list["dates"][0]["start"])).strftime(
+                            '%Y-%m-%d %H:%M') + "\n" + "Время конца мероприятия: " \
+                        + datetime.datetime.fromtimestamp(int(reply_list["dates"][0]["start"])).strftime(
+                            '%Y-%m-%d %H:%M') + "\n" + "Полное описание мероприятия: " + reply_list["site_url"]
+
+                bot.send_message(message.chat.id, reply, disable_web_page_preview=True)
+            bot.send_message(message.chat.id, "Надеемся, что мы смогли Вам помочь!",
+                             reply_markup=config.Ready)
+        usr_now.Step = 8
+
+>>>>>>> Stashed changes
 
 @bot.message_handler(content_types=['location'])
 def location(message):
