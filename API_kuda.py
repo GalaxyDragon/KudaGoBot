@@ -32,7 +32,7 @@ def get_next_events_geo(lat, lon, next_link):
     answer = requests.get(next_link).text
     answer = json.loads(answer)
     radius = next_link.split("=")
-    radius = radius[len(radius) - 1]
+    radius = int(radius[len(radius) - 1])
     while True:
         if answer["next"] is not None and answer["results"] is not None:
             return answer["next"], answer["results"]
