@@ -1,5 +1,4 @@
 import requests
-import time
 from flask import json
 
 
@@ -13,18 +12,16 @@ def get_events_geo(lat, lon, radius=1000):
     :return: ссылка на следующую страницу и 5 результатов на текущей странице
     """
     link = "https://kudago.com/public-api/v1.3/events/?lat=" + str(lat) + "&lon=" + str(lon) + "&radius=" + \
-           str(radius) + "&actual_since=" + str(time.time()) + "&page_size=5&fields=dates,title,description,site_url"
+           str(radius) + "&page_size=5&fields=dates,title,description,site_url"
     answer = requests.get(link).text
     answer = json.loads(answer)
-    print(answer)
     while True:
         if answer["next"] is not None and answer["results"] is not None:
             return answer["next"], answer["results"]
         else:
             radius += 1000
             link = "https://kudago.com/public-api/v1.3/events/?lat=" + str(lat) + "&lon=" + str(lon) + "&radius=" + \
-                   str(radius) + "&actual_since=" + str(time.time()) + "&page_size=5&fields=dates,title,description," \
-                                                                       "site_url "
+                   str(radius) + "&page_size=5&fields=dates,title,description,site_url"
             answer = requests.get(link).text
             answer = json.loads(answer)
             if radius >= 10000:
@@ -45,3 +42,4 @@ def get_next_events_geo(lat, lon, next_link):
                      str(radius) + "&page_size=5&fields=dates,title,description,site_url"
             answer = requests.get(__link).text
             answer = json.loads(answer)
+

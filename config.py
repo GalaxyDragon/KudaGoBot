@@ -2,8 +2,7 @@ from telebot import types
 
 token = '276811217:AAGiU92RPaTzIgfypmvoRrT1PsiIspRk0jE'
 main_menu = types.ReplyKeyboardMarkup()
-main_menu.row('Москва', "Питер")
-main_menu.row("Краснодар", "Казань")
+main_menu.row('Окай')
 Geolocate = types.ReplyKeyboardMarkup()
 Geolocate.one_time_keyboard = True
 Geolocate.row("Geo", "No geo")
