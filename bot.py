@@ -1,10 +1,9 @@
-import datetime
-import telebot
 import re
-import os
+import time
+import telebot
+from sqlalchemy import create_engine
 import API_kuda
 import config
-from sqlalchemy import create_engine
 
 
 class GetInformation:
@@ -15,14 +14,13 @@ class GetInformation:
     Type = None
     coord = [None, None]
     next_link = ""
+
     def request_(self):
         pass
 
 
-
 # не убирать, так удобнее понять из консоли что всё запустилось и всё кошерно
 print("Hello, my developer")
-
 
 bot = telebot.TeleBot(config.token)
 
@@ -73,7 +71,7 @@ def events(message):
         fet = result2.fetchone()
         step = fet["user_step"]
         if step == 1 and message.text == "Окай":
-            bot.send_message(message.chat.id, "Пожалуйства, подтвердите геолокацию", reply_markup=config.Geo_Take)
+            bot.send_message(message.chat.id, "Пожалуйства, отправьте свою геолокацию", reply_markup=config.Geo_Take)
 
         if step == 2 and ["Ещё", "Всё", "Заново"].count(message.text) == 1:
             a = message.text
@@ -95,14 +93,11 @@ def events(message):
                     for i in range(len(message_text)):
                         reply_list = message_text[i]
                         reply = "#" + str(i + 1) + "\n" + reply_list["title"] + "\n" \
-                                + cleanhtml(reply_list["description"]) + "\n" + "Время начала мероприятия: " + \
-                                datetime.datetime.fromtimestamp(int(reply_list["dates"][0]["start"])).strftime(
-                                    '%Y-%m-%d %H:%M') + "\n" + "Время конца мероприятия: " \
-                                + datetime.datetime.fromtimestamp(int(reply_list["dates"][0]["start"])).strftime(
-                            '%Y-%m-%d %H:%M') + "\n" + "Полное описание мероприятия: " + reply_list["site_url"]
+                                + cleanhtml(reply_list["description"]) + "\n" + "Полное описание мероприятия: " + reply_list["site_url"]
 
                         bot.send_message(message.chat.id, reply, disable_web_page_preview=True)
                     bot.send_message(message.chat.id, "Надеемся, что мы смогли Вам помочь!", reply_markup=config.Ending)
+                    time.sleep(1)
             if a == "Всё":
                 bot.send_message(message.chat.id, "бла бла бла 5-10")
             if a == "Заново":
@@ -111,21 +106,19 @@ def events(message):
 
 @bot.message_handler(content_types=['location'])
 def location(message):
-    a = message.location
-    b = str(a).split(":")
-    coord = [b[1].split(",")[0][1:], b[2][1:-1]]
+    user_location = message.location
     usr_id = message.chat.id
-    print(coord)
 
     engine = create_engine("sqlite:///some.db")
     engine.execute(
-        """update employee set user_len = (:user_len), user_lon = (:user_lon), user_step = (:user_step) where user_id = (:user_id)""",
-        user_len=float(coord[0]),
-        user_lon=float(coord[1]),
+        """update employee set user_len = (:user_len), user_lon = (:user_lon),
+        user_step = (:user_step) where user_id = (:user_id)""",
+        user_len=user_location.latitude,
+        user_lon=user_location.longitude,
         user_id=usr_id,
         user_step=2)
     bot.send_message(message.chat.id, "Ищем события для Вас...")
-    answer = API_kuda.get_events_geo(float(coord[0]), float(coord[1]))
+    answer = API_kuda.get_events_geo(user_location.latitude, user_location.longitude)
     bot.send_message(message.chat.id, "Спасибо за ожидаение!")
     if answer is None:
         answer = "Событий рядом с Вами найти не удалось."
@@ -142,14 +135,12 @@ def location(message):
         for i in range(len(message_text)):
             reply_list = message_text[i]
             reply = "#" + str(i + 1) + "\n" + reply_list["title"] + "\n" \
-                    + cleanhtml(reply_list["description"]) + "\n" + "Время начала мероприятия: " + \
-                    datetime.datetime.fromtimestamp(int(reply_list["dates"][0]["start"])).strftime(
-                        '%Y-%m-%d %H:%M') + "\n" + "Время конца мероприятия: " \
-                    + datetime.datetime.fromtimestamp(int(reply_list["dates"][0]["start"])).strftime(
-                '%Y-%m-%d %H:%M') + "\n" + "Полное описание мероприятия: " + reply_list["site_url"]
+                    + cleanhtml(reply_list["description"]) + "\n" + "Полное описание мероприятия: " + \
+                    reply_list["site_url"]
 
             bot.send_message(message.chat.id, reply, disable_web_page_preview=True)
         bot.send_message(message.chat.id, "Надеемся, что мы смогли Вам помочь!", reply_markup=config.Ending)
+
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)
