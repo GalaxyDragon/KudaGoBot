@@ -34,13 +34,11 @@ def cleanhtml(raw_html):
 @bot.message_handler(commands=["start"])
 def img_ids(message):
     usr_id = message.chat.id
-    engine = create_engine("sqlite:///some.db")
-    result = engine.execute(
-        "select * from "
-        "employee where user_id = :emp_id",
-        emp_id=usr_id)
-    print(result.fetchone())
-    print(result is None)
+    # engine = create_engine("sqlite:///some.db")
+    # result = engine.execute(
+    #     "select * from "
+    #     "employee where user_id = :emp_id",
+    #     emp_id=usr_id)
     try:
         engine = create_engine("sqlite:///some.db")
         engine.execute("""insert into employee (user_id) values (:user_id)""", user_id=usr_id)
@@ -51,12 +49,11 @@ def img_ids(message):
         """update employee set user_step = :user_step where user_id = :user_id""",
         user_id=usr_id,
         user_step=1)
-    bot.send_message(message.chat.id, "Текст какие мы классные:", reply_markup=config.main_menu)
+    bot.send_message(message.chat.id, "Дратути. Вашу геолокацию плз", reply_markup=config.Geo_Take)
 
 
 @bot.message_handler(content_types=["text"])
 def events(message):
-    step = 0
     usr_id = message.chat.id
     do_it = True
     engine = create_engine("sqlite:///some.db")
@@ -70,9 +67,6 @@ def events(message):
     if do_it:
         fet = result2.fetchone()
         step = fet["user_step"]
-        if step == 1 and message.text == "Окай":
-            bot.send_message(message.chat.id, "Пожалуйства, отправьте свою геолокацию", reply_markup=config.Geo_Take)
-
         if step == 2 and ["Ещё", "Всё", "Заново"].count(message.text) == 1:
             a = message.text
             if a == "Ещё":

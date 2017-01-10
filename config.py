@@ -14,12 +14,11 @@ Geo_Take = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time
 button_geo = types.KeyboardButton(text="Отправить местоположение", request_location=True)
 Geo_Take.add(button_geo)
 
-AGAIN = types.ReplyKeyboardMarkup()
-AGAIN.row("/start")
 
 Ending = types.ReplyKeyboardMarkup()
 Ending.row("Ещё")
-Ending.row("Всё", "Заново")
+Again = types.KeyboardButton(text="Новое местоположение", request_location=True)
+Ending.add(Again)
 
 Place_Type = types.ReplyKeyboardMarkup()
 Place_Type.row("Рестораны", "Бары", "Клубы", "Антикафе")
